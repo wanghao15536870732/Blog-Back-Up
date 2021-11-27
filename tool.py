@@ -1,4 +1,4 @@
-#coding: utf-8
+# coding: utf-8
 from PIL import Image
 import os
 import sys
@@ -17,12 +17,14 @@ def make_directory(directory):
     """创建目录"""
     os.makedirs(directory)
 
+
 def directory_exists(directory):
     """判断目录是否存在"""
     if os.path.exists(directory):
         return True
     else:
         return False
+
 
 def list_img_file(directory):
     """列出目录下所有文件，并筛选出图片文件列表返回"""
@@ -46,6 +48,7 @@ def print_help():
     3) smaller compress(4M to 300K around)
     """)
 
+
 def compress(choose, des_dir, src_dir, file_list):
     """压缩算法，img.thumbnail对图片进行压缩，
     
@@ -63,16 +66,18 @@ def compress(choose, des_dir, src_dir, file_list):
     if choose == '4':
         scale = SIZE_more_small_small
     for infile in file_list:
-        img = Image.open(src_dir+infile)
+        img = Image.open(src_dir + infile)
         # size_of_file = os.path.getsize(infile)
         w, h = img.size
-        img.thumbnail((int(w/scale), int(h/scale)))
+        img.thumbnail((int(w / scale), int(h / scale)))
         img.save(des_dir + infile)
+
+
 def compress_photo():
     '''调用压缩图片的函数
     '''
     src_dir, des_dir = "photos/", "min_photos/"
-    
+
     if directory_exists(src_dir):
         if not directory_exists(src_dir):
             make_directory(src_dir)
@@ -91,6 +96,7 @@ def compress_photo():
         print("=====没有新文件需要压缩=======")
     compress('4', des_dir, src_dir, file_list_src)
 
+
 def handle_photo():
     '''根据图片的文件名处理成需要的json格式的数据
     
@@ -100,29 +106,29 @@ def handle_photo():
     src_dir, des_dir = "photos/", "min_photos/"
     file_list = list_img_file(src_dir)
     list_info = []
-    file_list.sort(key=lambda x: x.split('_')[0])   # 按照日期排序
+    file_list.sort(key=lambda x: x.split('_')[0])  # 按照日期排序
     for i in range(len(file_list)):
         filename = file_list[i]
         date_str, info = filename.split("_")
         info, _ = info.split(".")
         date = datetime.strptime(date_str, "%Y-%m-%d")
-        year_month = date_str[0:7]            
+        year_month = date_str[0:7]
         if i == 0:  # 处理第一个文件
-            new_dict = {"date": year_month, "arr":{'year': date.year,
-                                                                   'month': date.month,
-                                                                   'link': [filename],
-                                                                   'text': [info],
-                                                                   'type': ['image']
-                                                                   }
-                                        } 
+            new_dict = {"date": year_month, "arr": {'year': date.year,
+                                                    'month': date.month,
+                                                    'link': [filename],
+                                                    'text': [info],
+                                                    'type': ['image']
+                                                    }
+                        }
             list_info.append(new_dict)
         elif year_month != list_info[-1]['date']:  # 不是最后的一个日期，就新建一个dict
-            new_dict = {"date": year_month, "arr":{'year': date.year,
-                                                   'month': date.month,
-                                                   'link': [filename],
-                                                   'text': [info],
-                                                   'type': ['image']
-                                                   }
+            new_dict = {"date": year_month, "arr": {'year': date.year,
+                                                    'month': date.month,
+                                                    'link': [filename],
+                                                    'text': [info],
+                                                    'type': ['image']
+                                                    }
                         }
             list_info.append(new_dict)
         else:  # 同一个日期
@@ -131,8 +137,9 @@ def handle_photo():
             list_info[-1]['arr']['type'].append('image')
     list_info.reverse()  # 翻转
     final_dict = {"list": list_info}
-    with open("../MyBlogs/source/photos/data.json","w") as fp:
+    with open("../MyBlogs/source/photos/data.json", "w") as fp:
         json.dump(final_dict, fp)
+
 
 def cut_photo():
     """裁剪算法
@@ -150,13 +157,12 @@ def cut_photo():
         if file_list:
             print_help()
             for infile in file_list:
-                img = Image.open(src_dir+infile)
-                Graphics(infile=src_dir+infile, outfile=src_dir + infile).cut_by_ratio()            
+                img = Image.open(src_dir + infile)
+                Graphics(infile=src_dir + infile, outfile=src_dir + infile).cut_by_ratio()
         else:
             pass
     else:
-        print("source directory not exist!")     
-
+        print("source directory not exist!")
 
 
 def git_operation():
@@ -170,8 +176,9 @@ def git_operation():
     os.system('git commit -m "add photos"')
     os.system('git push origin main')
 
+
 if __name__ == "__main__":
-    cut_photo()        # 裁剪图片，裁剪成正方形，去中间部分
-    compress_photo()   # 压缩图片，并保存到mini_photos文件夹下
-    git_operation()    # 提交到github仓库
-    handle_photo()     # 将文件处理成json格式，存到博客仓库中
+    cut_photo()  # 裁剪图片，裁剪成正方形，去中间部分
+    compress_photo()  # 压缩图片，并保存到mini_photos文件夹下
+    git_operation()  # 提交到github仓库
+    handle_photo()  # 将文件处理成json格式，存到博客仓库中
